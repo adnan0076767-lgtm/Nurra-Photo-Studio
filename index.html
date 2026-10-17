@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101116">
+<title>NURRA PHOTO STUDIO PRO</title>
+<style>
+:root {
+  --bg:#101116; --panel:#191a22; --panel2:#20212b;
+  --line:#30313e; --text:#f5f5fa; --muted:#9698aa;
+  --accent:#a78bfa; --cyan:#67e8f9;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font:14px/1.5 Inter,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{
+outline:2px solid var(--accent);outline-offset:2px}
+.topbar{height:62px;display:flex;align-items:center;justify-content:space-between;
+padding:0 18px;border-bottom:1px solid var(--line);gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.5px}
+.logo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
+background:linear-gradient(135deg,#a78bfa,#67e8f9);color:#111;font-size:20px}
+.brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:2px}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel2);padding:9px 12px;
+border-radius:9px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#171323;border-color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.layout{height:calc(100vh - 62px);min-height:500px;display:grid;
+grid-template-columns:64px 245px minmax(0,1fr) 270px;overflow:hidden}
+.tools{background:var(--panel);border-right:1px solid var(--line);
+padding:10px 7px;display:flex;flex-direction:column;gap:6px}
+.tool{border:1px solid transparent;background:transparent;border-radius:10px;
+min-height:49px;display:flex;flex-direction:column;align-items:center;
+justify-content:center;gap:2px;color:var(--muted);font-size:10px}
+.tool span{font-size:19px}
+.tool.active,.tool:hover{background:#2c2840;color:#e4d9ff;border-color:#51466d}
+.panel{background:var(--panel);overflow:auto;padding:15px;border-right:1px solid var(--line)}
+.right{border-right:0;border-left:1px solid var(--line)}
+.section{margin-bottom:22px}
+.section-title{font-size:11px;letter-spacing:1.5px;color:var(--muted);
+font-weight:800;margin-bottom:12px}
+.drop{border:1px dashed #59536f;border-radius:12px;padding:18px 8px;
+text-align:center;background:#211e2b;cursor:pointer}
+.drop strong{display:block;margin:6px 0}
+.drop small{color:var(--muted)}
+.drop.drag{border-color:var(--cyan);background:#172b33}
+.field{margin:12px 0}
+.field label{display:flex;justify-content:space-between;gap:8px;
+font-size:12px;color:#c9cad6;margin-bottom:7px}
+.field output{color:var(--cyan);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=color]{width:34px;height:28px;padding:2px;border:1px solid var(--line);
+border-radius:6px;background:var(--panel2)}
+input[type=text],select{width:100%;padding:9px;border-radius:8px;
+border:1px solid var(--line);background:#12131a;color:var(--text)}
+.field-row{display:flex;gap:8px;align-items:center}
+.field-row>*{flex:1;min-width:0}
+.workspace{min-width:0;display:flex;flex-direction:column;background:#101116}
+.workbar{height:45px;border-bottom:1px solid var(--line);display:flex;
+align-items:center;justify-content:space-between;padding:0 12px;gap:8px}
+.workbar small{color:var(--muted)}
+.canvas-wrap{flex:1;min-height:0;position:relative;overflow:hidden;
+display:flex;align-items:center;justify-content:center;padding:22px;
+background-color:#121319;
+background-image:radial-gradient(#30313c .8px,transparent .8px);
+background-size:18px 18px}
+#canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;
+object-fit:contain;box-shadow:0 14px 50px #0009;touch-action:none}
+.empty{position:absolute;text-align:center;max-width:300px;padding:22px;pointer-events:none}
+.empty .big{font-size:48px}
+.empty p{color:var(--muted)}
+.bottom-bar{min-height:36px;border-top:1px solid var(--line);display:flex;
+align-items:center;justify-content:space-between;padding:5px 12px;color:var(--muted);font-size:11px}
+.layer-list{display:flex;flex-direction:column;gap:7px}
+.layer{display:flex;align-items:center;gap:8px;border:1px solid var(--line);
+padding:9px;border-radius:9px;background:#14151c;cursor:pointer;min-width:0}
+.layer.selected{border-color:var(--accent);background:#292438}
+.layer .thumb{width:32px;height:32px;border-radius:5px;background:#292a35;
+display:grid;place-items:center;flex-shrink:0}
+.layer .layer-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layer .layer-name small{display:block;color:var(--muted);font-size:10px}
+.layer button{background:none;border:0;color:var(--muted);padding:3px}
+.note{font-size:11px;color:var(--muted);margin-top:8px}
+.status{color:var(--cyan)}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.mobile-panel-toggle{display:none}
+@media(max-width:1050px){
+ .layout{grid-template-columns:58px 210px minmax(0,1fr)}
+ .right{display:none}
+}
+@media(max-width:650px){
+ .topbar{padding:0 10px;height:56px}
+ .brand{font-size:12px;gap:7px}.logo{width:31px;height:31px}
+ .brand small{font-size:8px}
+ .top-actions{gap:5px}.top-actions .btn{padding:8px;font-size:11px}
+ .layout{height:calc(100dvh - 56px);min-height:0;
+ grid-template-columns:48px minmax(0,1fr)}
+ .tools{grid-column:1;grid-row:1;padding:7px 3px}
+ .tool{min-height:45px;font-size:9px}
+ .panel.left{grid-column:2;grid-row:1;display:none;border-right:0}
+ .panel.left.open{display:block;position:absolute;z-index:10;left:48px;top:56px;
+ bottom:0;width:min(270px,calc(100vw - 48px));box-shadow:12px 0 40px #0009}
+ .workspace{grid-column:2;grid-row:1}
+ .canvas-wrap{padding:10px}
+ .workbar{padding:0 7px}
+ .workbar .btn{padding:6px;font-size:11px}
+ .mobile-panel-toggle{display:inline-block}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">N</div>
+    <div>NURRA PHOTO STUDIO<small>PRO · PHOTO EDITOR</small></div>
+  </div>
+  <div class="top-actions">
+    <button class="btn" id="openBtn">＋ Foto</button>
+    <button class="btn" id="undoBtn" title="Undo" disabled>↶</button>
+    <button class="btn" id="redoBtn" title="Redo" disabled>↷</button>
+    <button class="btn primary" id="exportBtn">Export ↗</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="tools" aria-label="Alat editor">
+    <button class="tool active" data-tool="move"><span>↖</span>Move</button>
+    <button class="tool" data-tool="crop"><span>▣</span>Crop</button>
+    <button class="tool" data-tool="brush"><span>🖌</span>Brush</button>
+    <button class="tool" data-tool="eraser"><span>◩</span>Eraser</button>
+    <button class="tool" data-tool="text"><span>T</span>Text</button>
+    <button class="tool" data-tool="hand"><span>✋</span>Hand</button>
+    <button class="tool" id="settingsToggle"><span>☷</span>Adjust</button>
+  </nav>
+
+  <aside class="panel left" id="leftPanel">
+    <div class="section">
+      <div class="section-title">IMPORT IMAGE</div>
+      <div class="drop" id="drop">
+        <div style="font-size:27px">▧</div>
+        <strong>Upload foto</strong>
+        <small>JPG · PNG · WebP</small>
+        <small style="display:block;margin-top:8px">atau seret foto ke sini</small>
+      </div>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+    </div>
+
+    <div class="section">
+      <div class="section-title">IMAGE ADJUSTMENTS</div>
+      <div class="field"><label>Brightness <output id="brightnessVal">100%</output></label>
+        <input type="range" id="brightness" min="0" max="200" value="100"></div>
+      <div class="field"><label>Contrast <output id="contrastVal">100%</output></label>
+        <input type="range" id="contrast" min="0" max="200" value="100"></div>
+      <div class="field"><label>Saturation <output id="saturationVal">100%</output></label>
+        <input type="range" id="saturation" min="0" max="200" value="100"></div>
+      <div class="field"><label>Grayscale <output id="grayscaleVal">0%</output></label>
+        <input type="range" id="grayscale" min="0" max="100" value="0"></div>
+      <div class="field"><label>Sepia <output id="sepiaVal">0%</output></label>
+        <input type="range" id="sepia" min="0" max="100" value="0"></div>
+      <div class="field"><label>Blur <output id="blurVal">0px</output></label>
+        <input type="range" id="blur" min="0" max="10" value="0" step=".5"></div>
+      <button class="btn" id="resetAdjust" style="width:100%">Reset Adjustments</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">TRANSFORM</div>
+      <div class="field-row">
+        <button class="btn" id="rotateLeft">↶ Rotate</button>
+        <button class="btn" id="rotateRight">Rotate ↷</button>
+      </div>
+      <div class="field-row" style="margin-top:8px">
+        <button class="btn" id="flipH">↔ Flip H</button>
+        <button class="btn" id="flipV">↕ Flip V</button>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Width × Height</label>
+        <div class="field-row">
+          <input id="resizeW" type="number" min="1" max="10000" placeholder="Width">
+          <input id="resizeH" type="number" min="1" max="10000" placeholder="Height">
+        </div>
+      </div>
+      <button class="btn" id="resizeBtn" style="width:100%">Apply Resize</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">ADD TEXT</div>
+      <div class="field"><label>Text content</label>
+        <input type="text" id="textContent" placeholder="Tulis teks..."></div>
+      <div class="field"><label>Font size</label>
+        <input type="range" id="fontSize" min="12" max="180" value="48"></div>
+      <div class="field-row">
+        <div><label>Text color</label><input type="color" id="textColor" value="#ffffff"></div>
+        <div><label>Brush color</label><input type="color" id="brushColor" value="#a78bfa"></div>
+      </div>
+      <button class="btn" id="addText" style="width:100%;margin-top:10px">＋ Add Text</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">BRUSH SETTINGS</div>
+      <div class="field"><label>Brush size <output id="brushSizeVal">12px</output></label>
+        <input type="range" id="brushSize" min="1" max="100" value="12"></div>
+      <p class="note">Pilih Brush atau Eraser, lalu gambar langsung di foto.</p>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <div class="workbar">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        <button class="btn mobile-panel-toggle" id="panelToggle">☷</button>
+        <small id="fileName">Untitled project</small>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn" id="zoomOut">−</button>
+        <small id="zoomLabel">100%</small>
+        <button class="btn" id="zoomIn">＋</button>
+        <button class="btn" id="fitBtn">Fit</button>
+      </div>
+    </div>
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="canvas" width="1200" height="800" aria-label="Kanvas editor foto"></canvas>
+      <div class="empty" id="empty">
+        <div class="big">✦</div>
+        <strong>Your creative space</strong>
+        <p>Upload foto untuk mulai mengedit karya pertamamu.</p>
+        <button class="btn primary" id="emptyUpload">Pilih Foto</button>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <span id="dimensions">1200 × 800 px</span>
+      <span class="status" id="status">Ready</span>
+      <span>NURRA STUDIO</span>
+    </div>
+  </main>
+
+  <aside class="panel right">
+    <div class="section">
+      <div class="section-title">LAYERS</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="btn" id="layerUp" style="flex:1">↑</button>
+        <button class="btn" id="layerDown" style="flex:1">↓</button>
+        <button class="btn" id="deleteLayer" style="flex:1">✕</button>
+      </div>
+      <div class="layer-list" id="layers"></div>
+      <p class="note">Layer disusun dari bawah ke atas. Pilih layer untuk memindahkan atau menghapus objek.</p>
+    </div>
+    <hr>
+    <div class="section">
+      <div class="section-title">DOCUMENT</div>
+      <div class="field"><label>Canvas background</label>
+        <select id="canvasBg">
+          <option value="#ffffff">White</option>
+          <option value="#111111">Black</option>
+          <option value="#808080">Gray</option>
+          <option value="transparent">Transparent</option>
+        </select>
+      </div>
+      <div class="field"><label>Export format</label>
+        <select id="exportFormat">
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPG</option>
+        </select>
+      </div>
+      <div class="field"><label>JPG quality <output id="qualityVal">92%</output></label>
+        <input type="range" id="quality" min="50" max="100" value="92"></div>
+      <button class="btn primary" id="exportSide" style="width:100%">Download Image</button>
+    </div>
+    <hr>
+    <p class="note">Versi PRO awal. Foto diproses secara lokal di browser. Simpan hasil export secara berkala.</p>
+  </aside>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = id => document.getElementById(id);
+const canvas = $('canvas');
+const ctx = canvas.getContext('2d', {willReadFrequently:true});
+const base = document.createElement('canvas');
+const baseCtx = base.getContext('2d', {willReadFrequently:true});
+
+let hasImage = false, filename = 'Untitled project';
+let tool = 'move', zoom = 1, rotation = 0, flipH = false, flipV = false;
+let brushDown = false, lastPoint = null, cropStart = null, cropEnd = null;
+let objects = [], selectedId = null, nextId = 1;
+let undoStack = [], redoStack = [], historyBusy = false;
+let currentObjectDrag = null;
+let adjustments = {brightness:100,contrast:100,saturation:100,grayscale:0,sepia:0,blur:0};
+let canvasBg = '#ffffff';
+
+function status(msg){ $('status').textContent = msg; }
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function saveHistory(){
+  if(historyBusy)return;
+  try{
+    undoStack.push({
+      image:hasImage?base.toDataURL('image/png'):null,
+      w:canvas.width,h:canvas.height,
+      objects:JSON.parse(JSON.stringify(objects)),
+      adjustments:{...adjustments},rotation,flipH,flipV,canvasBg
+    });
+    if(undoStack.length>12)undoStack.shift();
+    redoStack=[];
+    updateHistoryButtons();
+  }catch(e){status('History penuh: lanjutkan edit dan export secara berkala.');}
+}
+function updateHistoryButtons(){
+  $('undoBtn').disabled=undoStack.length===0;
+  $('redoBtn').disabled=redoStack.length===0;
+}
+function restoreState(s){
+  historyBusy=true;
+  canvas.width=s.w;canvas.height=s.h;base.width=s.w;base.height=s.h;
+  objects=s.objects;adjustments={...s.adjustments};
+  rotation=s.rotation;flipH=s.flipH;flipV=s.flipV;canvasBg=s.canvasBg;
+  $('canvasBg').value=canvasBg;
+  Object.keys(adjustments).forEach(k=>{ $(k).value=adjustments[k];syncRange(k); });
+  const finish=()=>{
+    selectedId=objects.length?objects[objects.length-1].id:null;
+    render();renderLayers();updateInfo();historyBusy=false;updateHistoryButtons();
+  };
+  if(s.image){
+    const im=new Image();
+    im.onload=()=>{baseCtx.clearRect(0,0,base.width,base.height);baseCtx.drawImage(im,0,0);hasImage=true;finish();};
+    im.onerror=()=>{hasImage=false;finish();};im.src=s.image;
+  }else{baseCtx.clearRect(0,0,base.width,base.height);hasImage=false;finish();}
+}
+function undo(){
+  if(!undoStack.length)return;
+  redoStack.push(captureState());restoreState(undoStack.pop());
+  status('Undo');
+}
+function redo(){
+  if(!redoStack.length)return;
+  undoStack.push(captureState());restoreState(redoStack.pop());
+  status('Redo');
+}
+function captureState(){
+  return {image:hasImage?base.toDataURL('image/png'):null,w:canvas.width,h:canvas.height,
+    objects:JSON.parse(JSON.stringify(objects)),adjustments:{...adjustments},
+    rotation,flipH,flipV,canvasBg};
+}
+function syncRange(k){
+  const out=$(k+'Val');if(!out)return;
+  out.textContent=k==='blur'?adjustments[k]+'px':adjustments[k]+'%';
+}
+function filterString(){
+  return `brightness(${adjustments.brightness}%) contrast(${adjustments.contrast}%) saturate(${adjustments.saturation}%) grayscale(${adjustments.grayscale}%) sepia(${adjustments.sepia}%) blur(${adjustments.blur}px)`;
+}
+function render(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(canvasBg!=='transparent'){ctx.fillStyle=canvasBg;ctx.fillRect(0,0,canvas.width,canvas.height);}
+  if(hasImage){
+    ctx.save();
+    ctx.translate(canvas.width/2,canvas.height/2);
+    ctx.rotate(rotation*Math.PI/180);
+    ctx.scale(flipH?-1:1,flipV?-1:1);
+    const sideways=Math.abs(rotation%180)===90;
+    const dw=sideways?canvas.height:canvas.width;
+    const dh=sideways?canvas.width:canvas.height;
+    ctx.filter=filterString();
+    ctx.drawImage(base,-dw/2,-dh/2,dw,dh);
+    ctx.restore();ctx.filter='none';
+  }
+  objects.forEach(o=>{
+    if(o.type==='text'){
+      ctx.save();ctx.globalAlpha=o.opacity??1;
+      ctx.font=`${o.fontSize}px ${o.fontFamily||'Arial'}`;
+      ctx.textBaseline='top';ctx.fillStyle=o.color;
+      if(o.shadow){ctx.shadowColor='#000';ctx.shadowBlur=4;}
+      ctx.fillText(o.text,o.x,o.y);
+      ctx.restore();
+      o.w=ctx.measureText(o.text).width;o.h=o.fontSize*1.25;
+    }else if(o.type==='stroke'){
+      ctx.save();ctx.globalAlpha=o.opacity??1;
+      ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.lineWidth=o.size;ctx.strokeStyle=o.color;
+      if(o.erase)ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath();
+      o.points.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});
+      ctx.stroke();ctx.restore();
+      const xs=o.points.map(p=>p.x),ys=o.points.map(p=>p.y);
+      o.x=Math.min(...xs)-o.size;o.y=Math.min(...ys)-o.size;
+      o.w=Math.max(...xs)-Math.min(...xs)+o.size*2;
+      o.h=Math.max(...ys)-Math.min(...ys)+o.size*2;
+    }else if(o.type==='image'){
+      ctx.save();ctx.globalAlpha=o.opacity??1;
+      if(o.loadedImage)ctx.drawImage(o.loadedImage,o.x,o.y,o.w,o.h);
+      ctx.restore();
+    }
+  });
+  if(cropStart&&cropEnd&&tool==='crop'){
+    const x=Math.min(cropStart.x,cropEnd.x),y=Math.min(cropStart.y,cropEnd.y);
+    const w=Math.abs(cropEnd.x-cropStart.x),h=Math.abs(cropEnd.y-cropStart.y);
+    ctx.save();ctx.fillStyle='#0008';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.clearRect(x,y,w,h);
+    if(canvasBg!=='transparent'){ctx.fillStyle=canvasBg;ctx.fillRect(x,y,w,h);}
+    // Crop overlay is only a visual guide; render the underlying artwork again inside it.
+    ctx.restore();
+    ctx.save();ctx.strokeStyle='#fff';ctx.lineWidth=Math.max(1,canvas.width/900);
+    ctx.setLineDash([6,4]);ctx.strokeRect(x,y,w,h);ctx.restore();
+  }
+  $('empty').style.display=hasImage?'none':'block';
+  canvas.style.width=(canvas.width*zoom)+'px';
+  canvas.style.height=(canvas.height*zoom)+'px';
+  canvas.style.maxWidth='100%';canvas.style.maxHeight='100%';
+}
+function renderLayers(){
+  const list=$('layers');list.innerHTML='';
+  const all=[...(hasImage?[{id:'base',type:'base',name:'Background photo'}]:[]),...objects].reverse();
+  if(!all.length){list.innerHTML='<p class="note">Belum ada layer. Upload foto untuk memulai.</p>';return;}
+  all.forEach(o=>{
+    const div=document.createElement('div');
+    div.className='layer'+(o.id===selectedId?' selected':'');
+    const thumb=document.createElement('div');thumb.className='thumb';
+    thumb.textContent=o.type==='text'?'T':o.type==='stroke'?'✎':o.type==='image'?'▧':'▤';
+    const name=document.createElement('div');name.className='layer-name';
+    name.textContent=o.name||o.text||o.type;
+    const sub=document.createElement('small');sub.textContent=o.type==='base'?'Original image':o.type;
+    name.appendChild(sub);
+    const selectBtn=document.createElement('button');selectBtn.textContent='●';selectBtn.title='Select layer';
+    selectBtn.onclick=e=>{e.stopPropagation();selectedId=o.id;renderLayers();};
+    div.append(thumb,name,selectBtn);
+    div.onclick=()=>{selectedId=o.id;renderLayers();};
+    list.appendChild(div);
+  });
+}
+function updateInfo(){
+  $('dimensions').textContent=`${canvas.width} × ${canvas.height} px`;
+  $('zoomLabel').textContent=Math.round(zoom*100)+'%';
+  $('fileName').textContent=filename;
+  $('resizeW').value=canvas.width;$('resizeH').value=canvas.height;
+}
+function pointFromEvent(e){
+  const r=canvas.getBoundingClientRect();
+  return {x:clamp((e.clientX-r.left)*canvas.width/r.width,0,canvas.width),
+          y:clamp((e.clientY-r.top)*canvas.height/r.height,0,canvas.height)};
+}
+function hitTest(p){
+  for(let i=objects.length-1;i>=0;i--){
+    const o=objects[i];
+    if(p.x>=o.x-8&&p.x<=o.x+(o.w||0)+8&&p.y>=o.y-8&&p.y<=o.y+(o.h||0)+8)return o;
+  }return null;
+}
+function setTool(t){
+  tool=t;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===t));
+  canvas.style.cursor=t==='text'?'text':t==='hand'?'grab':t==='crop'?'crosshair':t==='move'?'default':'crosshair';
+  if(t!=='crop'){cropStart=null;cropEnd=null;render();}
+  status('Tool: '+t);
+}
+function loadFile(file){
+  if(!file)return;
+  if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)){status('Format foto tidak didukung.');return;}
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+    saveHistory();
+    const max=5000,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    base.width=Math.max(1,Math.round(img.naturalWidth*scale));
+    base.height=Math.max(1,Math.round(img.naturalHeight*scale));
+    canvas.width=base.width;canvas.height=base.height;
+    baseCtx.clearRect(0,0,base.width,base.height);baseCtx.drawImage(img,0,0,base.width,base.height);
+    hasImage=true;objects=[];selectedId=null;adjustments={brightness:100,contrast:100,saturation:100,grayscale:0,sepia:0,blur:0};
+    Object.keys(adjustments).forEach(k=>{$(k).value=adjustments[k];syncRange(k);});
+    rotation=0;flipH=false;flipV=false;filename=file.name;
+    $('leftPanel').classList.remove('open');zoom=1;fitZoom();
+    render();renderLayers();updateInfo();status('Foto berhasil dibuka');
+    URL.revokeObjectURL(url);
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);status('Foto gagal dibuka.');};
+  img.src=url;
+}
+function fitZoom(){
+  const wrap=$('canvasWrap');
+  zoom=Math.min((wrap.clientWidth-28)/canvas.width,(wrap.clientHeight-28)/canvas.height,1);
+  zoom=clamp(zoom,.05,4);render();updateInfo();
+}
+function commitCrop(){
+  if(!cropStart||!cropEnd)return;
+  const x=Math.round(Math.min(cropStart.x,cropEnd.x)),y=Math.round(Math.min(cropStart.y,cropEnd.y));
+  const w=Math.round(Math.abs(cropEnd.x-cropStart.x)),h=Math.round(Math.abs(cropEnd.y-cropStart.y));
+  if(w<5||h<5){cropStart=cropEnd=null;render();return;}
+  saveHistory();
+  const temp=document.createElement('canvas');temp.width=w;temp.height=h;
+  temp.getContext('2d').drawImage(canvas,x,y,w,h,0,0,w,h);
+  base.width=w;base.height=h;baseCtx.clearRect(0,0,w,h);baseCtx.drawImage(temp,0,0);
+  canvas.width=w;canvas.height=h;objects=[];rotation=0;flipH=false;flipV=false;
+  cropStart=cropEnd=null;setTool('move');fitZoom();renderLayers();updateInfo();status('Crop applied');
+}
+function exportImage(){
+  const format=$('exportFormat').value,quality=Number($('quality').value)/100;
+  const out=document.createElement('canvas');out.width=canvas.width;out.height=canvas.height;
+  const ox=out.getContext('2d');
+  if(format==='image/jpeg'){ox.fillStyle=canvasBg==='transparent'?'#ffffff':canvasBg;ox.fillRect(0,0,out.width,out.height);}
+  // Render final composition without crop guides.
+  ox.drawImage(canvas,0,0);
+  const a=document.createElement('a');
+  a.download=(filename.replace(/\.[^.]+$/,'')||'nurra-edit')+(format==='image/png'?'.png':'.jpg');
+  a.href=out.toDataURL(format,quality);a.click();status('Export selesai');
+}
+$('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
+$('openBtn').onclick=$('emptyUpload').onclick=()=>$('fileInput').click();
+$('drop').onclick=()=>$('fileInput').click();
+$('drop').addEventListener('dragover',e=>{e.preventDefault();$('drop').classList.add('drag');});
+$('drop').addEventListener('dragleave',()=>$('drop').classList.remove('drag'));
+$('drop').addEventListener('drop',e=>{e.preventDefault();$('drop').classList.remove('drag');loadFile(e.dataTransfer.files[0]);});
+$('canvasWrap').addEventListener('dragover',e=>e.preventDefault());
+$('canvasWrap').addEventListener('drop',e=>{e.preventDefault();loadFile(e.dataTransfer.files[0]);});
+document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+$('settingsToggle').onclick=()=>{$('leftPanel').classList.toggle('open');};
+$('panelToggle').onclick=()=>$('leftPanel').classList.toggle('open');
+Object.keys(adjustments).forEach(k=>{
+  $(k).addEventListener('input',()=>{
+    adjustments[k]=Number($(k).value);syncRange(k);render();
+  });
+  $(k).addEventListener('change',()=>{saveHistory();status('Adjustment updated');});
+});
+$('resetAdjust').onclick=()=>{saveHistory();adjustments={brightness:100,contrast:100,saturation:100,grayscale:0,sepia:0,blur:0};
+  Object.keys(adjustments).forEach(k=>{$(k).value=adjustments[k];syncRange(k);});render();status('Adjustment reset');};
+$('rotateLeft').onclick=()=>{saveHistory();rotation=(rotation+270)%360;render();};
+$('rotateRight').onclick=()=>{saveHistory();rotation=(rotation+90)%360;render();};
+$('flipH').onclick=()=>{saveHistory();flipH=!flipH;render();};
+$('flipV').onclick=()=>{saveHistory();flipV=!flipV;render();};
+$('resizeBtn').onclick=()=>{
+  const w=Number($('resizeW').value),h=Number($('resizeH').value);
+  if(!w||!h||w<1||h<1||w>10000||h>10000){status('Ukuran harus 1–10000 px');return;}
+  saveHistory();
+  const temp=document.createElement('canvas');temp.width=w;temp.height=h;
+  temp.getContext('2d').drawImage(canvas,0,0,w,h);
+  base.width=w;base.height=h;baseCtx.clearRect(0,0,w,h);baseCtx.drawImage(temp,0,0);
+  canvas.width=w;canvas.height=h;objects=[];rotation=0;flipH=false;flipV=false;
+  render();fitZoom();renderLayers();updateInfo();status('Resize applied');
+};
+$('addText').onclick=()=>{
+  const text=$('textContent').value.trim();if(!text){status('Masukkan teks terlebih dahulu');return;}
+  saveHistory();
+  const o={id:nextId++,type:'text',name:'Text: '+text.slice(0,18),text,
+    x:canvas.width*.1,y:canvas.height*.1,fontSize:Number($('fontSize').value),
+    color:$('textColor').value,w:100,h:60,shadow:true};
+  objects.push(o);selectedId=o.id;render();renderLayers();status('Text added');
+};
+$('brushSize').oninput=()=>$('brushSizeVal').textContent=$('brushSize').value+'px';
+$('canvasBg').onchange=()=>{saveHistory();canvasBg=$('canvasBg').value;render();};
+$('quality').oninput=()=>$('qualityVal').textContent=$('quality').value+'%';
+$('exportBtn').onclick=$('exportSide').onclick=exportImage;
+$('undoBtn').onclick=undo;$('redoBtn').onclick=redo;
+$('zoomIn').onclick=()=>{zoom=clamp(zoom*1.2,.05,4);render();updateInfo();};
+$('zoomOut').onclick=()=>{zoom=clamp(zoom/1.2,.05,4);render();updateInfo();};
+$('fitBtn').onclick=fitZoom;
+
+canvas.addEventListener('pointerdown',e=>{
+  if(!hasImage&&tool!=='text'&&tool!=='move'){status('Upload foto terlebih dahulu');return;}
+  const p=pointFromEvent(e);
+  if(tool==='crop'){cropStart=p;cropEnd=p;canvas.setPointerCapture(e.pointerId);render();return;}
+  if(tool==='text'){
+    const txt=$('textContent').value.trim();
+    if(!txt){$('textContent').focus();status('Isi teks pada panel kiri dahulu');return;}
+    saveHistory();const o={id:nextId++,type:'text',name:'Text: '+txt.slice(0,18),text:txt,x:p.x,y:p.y,
+      fontSize:Number($('fontSize').value),color:$('textColor').value,w:100,h:60,shadow:true};
+    objects.push(o);selectedId=o.id;render();renderLayers();return;
+  }
+  if(tool==='brush'||tool==='eraser'){
+    saveHistory();brushDown=true;canvas.setPointerCapture(e.pointerId);
+    const o={id:nextId++,type:'stroke',name:tool==='eraser'?'Eraser stroke':'Brush stroke',
+      x:p.x,y:p.y,w:1,h:1,size:Number($('brushSize').value),
+      color:$('brushColor').value,erase:tool==='eraser',points:[p]};
+    objects.push(o);selectedId=o.id;lastPoint=p;renderLayers();render();return;
+  }
+  if(tool==='move'){
+    const hit=hitTest(p);
+    if(hit){selectedId=hit.id;currentObjectDrag={id:hit.id,start:p,ox:hit.x,oy:hit.y};canvas.setPointerCapture(e.pointerId);renderLayers();}
+    else {selectedId=null;}
+    render();
+  }
+});
+canvas.addEventListener('pointermove',e=>{
+  const p=pointFromEvent(e);
+  if(tool==='crop'&&cropStart){cropEnd=p;render();return;}
+  if(brushDown&&lastPoint){
+    const o=objects[objects.length-1];if(o&&o.type==='stroke'){o.points.push(p);lastPoint=p;render();}return;
+  }
+  if(currentObjectDrag){
+    const o=objects.find(o=>o.id===currentObjectDrag.id);
+    if(o){o.x=currentObjectDrag.ox+p.x-currentObjectDrag.start.x;o.y=currentObjectDrag.oy+p.y-currentObjectDrag.start.y;render();}
+  }
+});
+function pointerUp(){
+  if(brushDown){brushDown=false;lastPoint=null;renderLayers();status('Stroke added');}
+  if(currentObjectDrag){currentObjectDrag=null;renderLayers();status('Object moved');}
+}
+canvas.addEventListener('pointerup',pointerUp);
+canvas.addEventListener('pointercancel',pointerUp);
+canvas.addEventListener('dblclick',()=>{if(tool==='crop')commitCrop();});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+$('deleteLayer').onclick=()=>{
+  if(selectedId==='base'){status('Background photo tidak dapat dihapus.');return;}
+  const i=objects.findIndex(o=>o.id===selectedId);if(i<0)return;
+  saveHistory();objects.splice(i,1);selectedId=null;render();renderLayers();status('Layer deleted');
+};
+$('layerUp').onclick=()=>{
+  const i=objects.findIndex(o=>o.id===selectedId);if(i<0||i===objects.length-1)return;
+  saveHistory();[objects[i],objects[i+1]]=[objects[i+1],objects[i]];
+  render();renderLayers();
+};
+$('layerDown').onclick=()=>{
+  const i=objects.findIndex(o=>o.id===selectedId);if(i<=0)return;
+  saveHistory();[objects[i],objects[i-1]]=[objects[i-1],objects[i]];
+  render();renderLayers();
+};
+$('canvasWrap').addEventListener('pointerup',()=>{});
+window.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo();}
+  if(e.key==='Escape'){cropStart=cropEnd=null;render();}
+  if(e.key==='Enter'&&tool==='crop')commitCrop();
+});
+const originalRender=render;
+// Override rendering crop guide so preview never destroys the underlying image.
+render=function(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(canvasBg!=='transparent'){ctx.fillStyle=canvasBg;ctx.fillRect(0,0,canvas.width,canvas.height);}
+  if(hasImage){
+    ctx.save();ctx.translate(canvas.width/2,canvas.height/2);
+    ctx.rotate(rotation*Math.PI/180);ctx.scale(flipH?-1:1,flipV?-1:1);
+    const side=Math.abs(rotation%180)===90;
+    ctx.filter=filterString();
+    ctx.drawImage(base,-(side?canvas.height:canvas.width)/2,
+      -(side?canvas.width:canvas.height)/2,side?canvas.height:canvas.width,
+      side?canvas.width:canvas.height);
+    ctx.restore();ctx.filter='none';
+  }
+  objects.forEach(o=>{
+    ctx.save();ctx.globalAlpha=o.opacity??1;
+    if(o.type==='text'){
+      ctx.font=`${o.fontSize}px ${o.fontFamily||'Arial'}`;ctx.textBaseline='top';
+      ctx.fillStyle=o.color;if(o.shadow){ctx.shadowColor='#000';ctx.shadowBlur=4;}
+      ctx.fillText(o.text,o.x,o.y);o.w=ctx.measureText(o.text).width;o.h=o.fontSize*1.25;
+    }else if(o.type==='stroke'){
+      ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=o.size;ctx.strokeStyle=o.color;
+      if(o.erase)ctx.globalCompositeOperation='destination-out';
+      ctx.beginPath();o.points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+      if(o.points.length){const xs=o.points.map(p=>p.x),ys=o.points.map(p=>p.y);
+        o.x=Math.min(...xs)-o.size;o.y=Math.min(...ys)-o.size;
+        o.w=Math.max(...xs)-Math.min(...xs)+o.size*2;o.h=Math.max(...ys)-Math.min(...ys)+o.size*2;}
+    }else if(o.type==='image'&&o.loadedImage)ctx.drawImage(o.loadedImage,o.x,o.y,o.w,o.h);
+    ctx.restore();
+  });
+  if(cropStart&&cropEnd&&tool==='crop'){
+    const x=Math.min(cropStart.x,cropEnd.x),y=Math.min(cropStart.y,cropEnd.y);
+    const w=Math.abs(cropEnd.x-cropStart.x),h=Math.abs(cropEnd.y-cropStart.y);
+    ctx.save();ctx.fillStyle='#0009';
+    ctx.beginPath();ctx.rect(0,0,canvas.width,canvas.height);ctx.rect(x,y,w,h);
+    ctx.fill('evenodd');ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+    ctx.strokeRect(x,y,w,h);ctx.restore();
+  }
+  $('empty').style.display=hasImage?'none':'block';
+  canvas.style.width=(canvas.width*zoom)+'px';canvas.style.height=(canvas.height*zoom)+'px';
+  canvas.style.maxWidth='100%';canvas.style.maxHeight='100%';
+};
+$('canvas').addEventListener('pointerup',()=>{});
+const observer=new ResizeObserver(()=>{if(!hasImage)fitZoom();});
+observer.observe($('canvasWrap'));
+canvas.width=1200;canvas.height=800;base.width=1200;base.height=800;
+baseCtx.clearRect(0,0,base.width,base.height);
+render();renderLayers();updateInfo();updateHistoryButtons();
+status('Ready · Upload foto untuk memulai');
+})();
+</script>
+</body>
+</html>
